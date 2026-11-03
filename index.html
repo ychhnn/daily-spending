@@ -95,6 +95,7 @@ textarea{flex:1;min-width:0;resize:none;border:1px solid var(--line);background:
 .row .s{font-size:12px;color:var(--muted)}
 .row .a{font-weight:600}
 #panel-siri{display:flex;flex-direction:column;gap:12px;margin-top:4px}
+body.member .owner-only{display:none!important}
 body.locked .wrap>*:not(header):not(#setupCard){display:none!important}
 body.locked header .month{display:none}
 .empty{text-align:center;color:var(--muted);padding:28px 8px;font-size:14px}
@@ -293,7 +294,7 @@ code{font-family:var(--mono);font-size:12.5px;background:var(--bg);border:1px so
         <button class="btn ghost sm" id="copySiri">拷貝網址</button>
         <p style="margin:6px 0 0;color:var(--muted)">捷徑取名「隨口記帳」，不要只叫「記帳」，Siri 會誤會成轉帳。</p>
       </details>
-      <div class="field" style="border-top:1px solid var(--line);padding-top:10px">分享捷徑給朋友：在捷徑 App 分享 →「拷貝 iCloud 連結」，貼在這裡。連結只存在你的試算表，陌生人看不到。
+      <div class="field owner-only" style="border-top:1px solid var(--line);padding-top:10px">分享捷徑給朋友：在捷徑 App 分享 →「拷貝 iCloud 連結」，貼在這裡。連結只存在你的試算表，陌生人看不到。
         <div style="display:flex;gap:8px"><input id="scLink" inputmode="url" placeholder="https://www.icloud.com/shortcuts/…" style="flex:1;min-width:0"><button class="btn ghost sm" id="scSave">儲存</button></div>
       </div>
     </div>
@@ -306,7 +307,7 @@ code{font-family:var(--mono);font-size:12.5px;background:var(--bg);border:1px so
         <li>分錯了就點那筆改分類，之後同樣的東西會照你的改法自動分。</li>
       </ul>
     </div>
-    <div class="card">
+    <div class="card owner-only">
       <h3>給朋友的專屬網址</h3>
       <p style="margin:0;font-size:14px">輸入名字，產生一個網址傳給他。他打開就直接連上、用這個名字記帳，什麼都不用填。</p>
       <div style="display:flex;gap:8px"><input id="invName" maxlength="10" placeholder="朋友的名字" style="flex:1;min-width:0;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;padding:8px 10px;font:inherit;font-size:16px"><button class="btn sm" id="invGo" style="height:40px">產生</button></div>
@@ -1009,6 +1010,7 @@ const CFG = { url: LS.get("ledger.url") || DEFAULT_URL, key: "", name: LS.get("l
   const q = new URLSearchParams(h), id = q.get("s") || "", n = (q.get("n") || "").trim().slice(0, 10);
   if (!/^[\w-]{10,}$/.test(id)) return;
   CFG.url = "https://script.google.com/macros/s/" + id + "/exec"; LS.set("ledger.url", CFG.url);
+  if (LS.get("ledger.role") !== "owner") LS.set("ledger.role", "member");   // 用專屬網址進來的是朋友
   if (n){ CFG.name = n; LS.set("ledger.name", n); }
 })();
 function inviteLink(name){
@@ -1090,7 +1092,8 @@ $("sGo").onclick = async () => {
   $("sGo").disabled = true; $("sGo").textContent = "連線中…";
   try {
     await api("all", null, cfg);
-    LS.set("ledger.url", cfg.url); LS.set("ledger.name", cfg.name);
+    LS.set("ledger.url", cfg.url); LS.set("ledger.name", cfg.name); LS.set("ledger.role", "owner");
+    document.body.classList.remove("member");
     Object.assign(CFG, cfg);
     $("setupCard").hidden = true; document.body.classList.remove("locked"); toast("連上了");
     if (state.db){ state.me = CFG.name; state.db.refresh(); } else connect();
@@ -1139,6 +1142,7 @@ function connect(){
   document.addEventListener("visibilitychange", () => { if (!document.hidden) db.refresh(); });
 }
 
+if (LS.get("ledger.role") === "member") document.body.classList.add("member");
 renderConn();
 if (!CFG.url){ document.body.classList.add("locked"); state.loaded = true; renderAll(); showSetup(); }
 else connect();
