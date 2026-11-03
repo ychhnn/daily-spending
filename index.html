@@ -285,13 +285,19 @@ code{font-family:var(--mono);font-size:12.5px;background:var(--bg);border:1px so
       <p style="margin:0;font-size:14px">裝好後說「嘿 Siri，隨口記帳」，回答「午餐壽司郎500」，Siri 會直接記好並唸出結果，不用打開網頁。</p>
       <a class="btn" id="addShortcut" href="#" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;justify-content:center;text-decoration:none;align-self:flex-start;height:44px">加入 Siri 捷徑</a>
       <p style="margin:0;font-size:13px;color:var(--muted)" id="shortcutHint">按下去會打開「捷徑」App，按「加入捷徑」，再填你的<b>名字</b>就好。</p>
-      <details style="font-size:14px"><summary style="cursor:pointer;color:var(--muted)">自己建立捷徑（3 個動作）</summary>
+      <details class="owner-only" style="font-size:14px"><summary style="cursor:pointer;color:var(--muted)">建立捷徑（4 個動作）</summary>
         <ol class="steps" style="margin-top:8px">
+          <li><b>文字</b>：填你的名字。</li>
           <li><b>要求輸入</b>：類型選文字，提示寫「花了什麼？」。</li>
-          <li><b>取得 URL 內容</b>：網址貼 <code id="siriUrl" style="user-select:all">還沒連線</code>。點「顯示更多」，方法選 <b>POST</b>，要求本文選 <b>JSON</b>，加三個欄位：<code>action</code> 填 quick、<code>by</code> 填你的名字、<code>text</code> 選「提供的輸入」。</li>
-          <li><b>朗讀文字</b>：朗讀「URL 的內容」。</li>
+          <li><b>取得 URL 內容</b>：網址貼 <code id="siriUrl" style="user-select:all">還沒連線</code>。點藍色箭頭展開，方法選 <b>POST</b>，要求本文選 <b>JSON</b>，加三個「文字」欄位：<code>action</code> 填 quick、<code>by</code> 選第 1 步的「文字」、<code>text</code> 選「提供的輸入」。</li>
+          <li><b>顯示通知</b>（或朗讀文字）：選「URL 內容」。</li>
         </ol>
         <button class="btn ghost sm" id="copySiri">拷貝網址</button>
+        <p style="margin:10px 0 4px;font-weight:600">分享給朋友前</p>
+        <ol class="steps">
+          <li>按下方 ⓘ →「設定」→「新增問題」→ 點第 1 步裡的名字，問題寫「你的名字？」。朋友安裝時填一次，之後不會再問。</li>
+          <li>按分享 →「拷貝 iCloud 連結」，貼到下面的欄位 → 儲存。</li>
+        </ol>
         <p style="margin:6px 0 0;color:var(--muted)">捷徑取名「隨口記帳」，不要只叫「記帳」，Siri 會誤會成轉帳。</p>
       </details>
       <div class="field owner-only" style="border-top:1px solid var(--line);padding-top:10px">分享捷徑給朋友：在捷徑 App 分享 →「拷貝 iCloud 連結」，貼在這裡。連結只存在你的試算表，陌生人看不到。
@@ -1063,12 +1069,16 @@ function renderShortcut(){
   a.setAttribute("aria-disabled", u ? "false" : "true");
   $("shortcutHint").innerHTML = u
     ? "按下去會打開「捷徑」App，按「加入捷徑」，再填你的<b>名字</b>就好。"
-    : "還沒有可以加入的捷徑。先照下面「自己建立捷徑」做一個，再把 iCloud 連結貼到最下面的欄位，這個按鈕就能用了。";
+    : (document.body.classList.contains("member")
+        ? "捷徑還沒準備好，請跟分享記帳本給你的人說一聲。"
+        : "還沒有可以加入的捷徑。先照下面「建立捷徑」做一個，再把 iCloud 連結貼到最下面的欄位，這個按鈕就能用了。");
   $("shortcutHint").hidden = false;
   if (document.activeElement !== $("scLink")) $("scLink").value = u;
 }
 $("addShortcut").addEventListener("click", ev => {
-  if (!state.shortcut){ ev.preventDefault(); const d = document.querySelector("#panel-siri details"); if (d) d.open = true; $("scLink").scrollIntoView({ behavior: "smooth", block: "center" }); toast("先貼上捷徑的 iCloud 連結"); }
+  if (!state.shortcut){ ev.preventDefault();
+    if (document.body.classList.contains("member")){ toast("捷徑還沒準備好"); return; }
+    const d = document.querySelector("#panel-siri details"); if (d) d.open = true; $("scLink").scrollIntoView({ behavior: "smooth", block: "center" }); toast("先貼上捷徑的 iCloud 連結"); }
 });
 $("scSave").onclick = async () => {
   const v = $("scLink").value.trim();
