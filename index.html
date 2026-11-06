@@ -487,7 +487,7 @@ const DEMO = (() => {
     [-6,"高鐵","",1490,"交通"],[-8,"房租","",12000,"居家"],[-9,"牙醫","",350,"醫療"],[-11,"麥當勞","午餐",159,"餐飲"]];
   return rows.map(([d,p,i,a,c],k) => ({ id:"demo"+k, date: ymd(addDays(t,d)), item:p, sub:i, note:"", amount:a, cat:c, demo:true }));
 })();
-const showingDemo = () => state.loaded && state.entries.length === 0;
+const showingDemo = () => false;   // 不顯示示範資料
 const allEntries = () => showingDemo() ? DEMO : state.entries;
 
 const fmt = n => "NT$" + Math.round(n).toLocaleString("zh-TW");
