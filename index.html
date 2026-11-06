@@ -48,10 +48,11 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 
 header{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
 h1{white-space:nowrap}
-@media (max-width:440px){h1{font-size:19px}header{flex-wrap:nowrap}.month span{min-width:0!important;white-space:nowrap}.month button{width:28px!important}}
+@media (max-width:440px){h1{font-size:20px}header{flex-wrap:wrap;row-gap:10px}.month{width:100%;justify-content:space-between;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:2px}.month span{white-space:nowrap;font-size:16px}.month button{width:56px!important;height:44px!important;border-radius:10px!important}}
 h1{font-family:var(--display);font-weight:600;font-size:22px;margin:0;letter-spacing:-.01em;display:flex;align-items:center;gap:8px}h1 img.cats{height:1.55em;width:auto;flex:none;display:block;margin-block:-.15em}
 .month{display:flex;align-items:center;gap:4px}
-.month button{border:0;background:transparent;width:34px;height:34px;border-radius:50%;font-size:18px;color:var(--muted)}
+.month button{border:0;background:transparent;width:44px;height:44px;border-radius:50%;font-size:24px;line-height:1;color:var(--muted);display:grid;place-items:center}
+html,button,a,input,select,textarea,label,summary{touch-action:manipulation}
 .month button:hover{background:var(--accent-soft);color:var(--accent)}
 .month span{font-weight:500;min-width:5em;text-align:center;font-family:var(--mono);font-variant-numeric:tabular-nums}
 
