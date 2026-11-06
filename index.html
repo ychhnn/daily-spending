@@ -48,10 +48,10 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 
 header{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
 h1{white-space:nowrap}
-@media (max-width:440px){h1{font-size:20px}header{flex-wrap:wrap;row-gap:10px}.month{width:100%;justify-content:space-between;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:2px}.month span{white-space:nowrap;font-size:16px}.month button{width:56px!important;height:44px!important;border-radius:10px!important;background:var(--accent-soft)!important}}
+@media (max-width:440px){h1{font-size:17px;gap:6px;min-width:0;overflow:hidden;text-overflow:ellipsis}h1 img.cats{height:1.45em}header{flex-wrap:nowrap;gap:6px}.month{gap:2px;flex:none}.month span{white-space:nowrap;font-size:13px;min-width:0!important}.month button{width:32px!important;height:32px!important;border-radius:9px!important}.month button svg{width:16px;height:16px}}
 h1{font-family:var(--display);font-weight:600;font-size:22px;margin:0;letter-spacing:-.01em;display:flex;align-items:center;gap:8px}h1 img.cats{height:1.55em;width:auto;flex:none;display:block;margin-block:-.15em}
 .month{display:flex;align-items:center;gap:4px}
-.month button{border:0;background:transparent;width:44px;height:44px;border-radius:50%;font-size:24px;line-height:1;color:var(--ink);display:grid;place-items:center}
+.month button{border:0;background:var(--accent-soft);width:36px;height:36px;border-radius:10px;font-size:24px;line-height:1;color:var(--ink);display:grid;place-items:center;padding:0}
 html,button,a,input,select,textarea,label,summary{touch-action:manipulation}
 .month button:hover{background:var(--accent-soft);color:var(--accent)}
 .month span{font-weight:500;min-width:5em;text-align:center;font-family:var(--mono);font-variant-numeric:tabular-nums}
@@ -329,7 +329,7 @@ code{font-family:var(--mono);font-size:12.5px;background:var(--bg);border:1px so
       <p style="margin:0;font-size:14px" id="connInfo">還沒連線</p>
       <div class="actions"><span></span><button class="btn ghost sm" id="reSetup">重新設定</button></div>
     </div>
-    <p style="margin:4px 0 0;text-align:center;font-size:12px;color:var(--muted)">版本 2026-11-06</p>
+    <p style="margin:4px 0 0;text-align:center;font-size:12px;color:var(--muted)">版本 2026-11-06b</p>
   </section>
 </div>
 
