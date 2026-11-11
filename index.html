@@ -332,7 +332,7 @@ code{font-family:var(--mono);font-size:12.5px;background:var(--bg);border:1px so
       <p style="margin:0;font-size:14px" id="connInfo">還沒連線</p>
       <div class="actions"><span></span><button class="btn ghost sm" id="reSetup">重新設定</button></div>
     </div>
-    <p style="margin:4px 0 0;text-align:center;font-size:12px;color:var(--muted)">版本 v4</p>
+    <p style="margin:4px 0 0;text-align:center;font-size:12px;color:var(--muted)">版本 v5</p>
   </section>
 </div>
 
@@ -652,7 +652,7 @@ function renderStats(){
   svg += `</svg>`;
   html += `<div class="card"><h3>每日支出</h3>${svg}</div>`;
 
-  if (multi()){
+  if (false && multi()){   // 「誰花的」卡片已關閉：一起記帳不用分人
     const byP = {}; cur.forEach(e => { const k = e.by || "?"; byP[k] = (byP[k]||0) + (+e.amount||0); });
     const ps = Object.entries(byP).sort((a,b)=>b[1]-a[1]); const mx = ps[0][1] || 1;
     html += `<div class="card"><h3>誰花的</h3>` + ps.map(([k,v]) => `<div class="catbar"><span>${esc(k === "?" ? "未標記" : personName(k))}</span>
