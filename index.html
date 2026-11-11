@@ -332,7 +332,7 @@ code{font-family:var(--mono);font-size:12.5px;background:var(--bg);border:1px so
       <p style="margin:0;font-size:14px" id="connInfo">還沒連線</p>
       <div class="actions"><span></span><button class="btn ghost sm" id="reSetup">重新設定</button></div>
     </div>
-    <p style="margin:4px 0 0;text-align:center;font-size:12px;color:var(--muted)">版本 v3</p>
+    <p style="margin:4px 0 0;text-align:center;font-size:12px;color:var(--muted)">版本 v4</p>
   </section>
 </div>
 
@@ -938,20 +938,23 @@ function openSheet(id){
     [...$("fCat").children].forEach(x => x.setAttribute("aria-pressed", x.dataset.c === cat)); });
   $("fDel").onclick = async () => {
     if (!armed){ armed = true; $("fDel").textContent = "再按一次確定刪除"; $("fDel").className = "btn danger"; $("fDel").style.color = ""; $("fDel").style.height = "38px"; return; }
-    try { await state.db.collection("expenses").doc(e.id).delete(); close(); toast("已刪除"); } catch(err){ toast("刪除失敗：" + (err.message||"")); }
+    close(); toast("已刪除");
+    state.db.collection("expenses").doc(e.id).delete().catch(err => toast("刪除失敗，已還原：" + (err.message||"")));
   };
   $("fSave").onclick = async () => {
     const upd = { date: $("fDate").value || e.date, amount: parseFloat($("fAmt").value) || 0,
       item: $("fItem").value.trim(), sub: $("fSub").value.trim(), note: $("fNote").value.trim(), cat };
-    try {
-      await state.db.collection("expenses").doc(e.id).update(upd);
-      if ((cat !== e.cat || upd.sub !== (e.sub || "")) && upd.item){
-        const rules = { ...state.rules, [upd.item]: { cat, sub: upd.sub } };
-        await state.db.doc("settings/rules").set({ map: rules });
-        toast(`已儲存。之後「${upd.item}」會自動分到${cat}${upd.sub ? "・" + upd.sub : ""}`);
-      } else toast("已儲存");
-      close();
-    } catch(err){ toast("儲存失敗：" + (err.message||"")); }
+    const learn = (cat !== e.cat || upd.sub !== (e.sub || "")) && upd.item;
+    close();
+    toast(learn ? `已儲存。之後「${upd.item}」會自動分到${cat}${upd.sub ? "・" + upd.sub : ""}` : "已儲存");
+    // 畫面先更新，資料在背景同步到試算表
+    (async () => {
+      try {
+        const jobs = [state.db.collection("expenses").doc(e.id).update(upd)];
+        if (learn) jobs.push(state.db.doc("settings/rules").set({ map: { ...state.rules, [upd.item]: { cat, sub: upd.sub } } }));
+        await Promise.all(jobs);
+      } catch(err){ toast("沒有存到試算表，已還原：" + (err.message||"")); }
+    })();
   };
 }
 $("listHost").addEventListener("click", ev => { const r = ev.target.closest(".row"); if (r) openSheet(r.dataset.id); });
@@ -1021,14 +1024,23 @@ const CFG = { url: LS.get("ledger.url") || DEFAULT_URL, key: "", name: LS.get("l
   const q = new URLSearchParams(h), id = q.get("s") || "", n = (q.get("n") || "").trim().slice(0, 10);
   if (!/^[\w-]{10,}$/.test(id)) return;
   CFG.url = "https://script.google.com/macros/s/" + id + "/exec"; LS.set("ledger.url", CFG.url);
-  if (LS.get("ledger.role") !== "owner") LS.set("ledger.role", "member");   // 用專屬網址進來的是朋友
+  if (q.get("o") === "1") LS.set("ledger.role", "owner");                    // 自己的網址
+  else if (LS.get("ledger.role") !== "owner") LS.set("ledger.role", "member"); // 用專屬網址進來的是朋友
   if (n){ CFG.name = n; LS.set("ledger.name", n); }
 })();
-function inviteLink(name){
+function inviteHash(name, owner){
   const m = (CFG.url || "").match(/\/macros\/s\/([\w-]+)\/exec/);
   if (!m) return "";
-  return location.origin + location.pathname + "#s=" + m[1] + (name ? "&n=" + encodeURIComponent(name) : "");
+  return "#s=" + m[1] + (name ? "&n=" + encodeURIComponent(name) : "") + (owner ? "&o=1" : "");
 }
+function inviteLink(name){ const h = inviteHash(name, false); return h ? location.origin + location.pathname + h : ""; }
+// 把自己的連線資訊放進網址，加入主畫面或書籤後，就算瀏覽器清掉資料也不用重貼
+function syncHash(){
+  if (location.hash.startsWith("#add-")) return;
+  const h = inviteHash(CFG.name, LS.get("ledger.role") !== "member");
+  if (h && location.hash !== h){ try { history.replaceState(null, "", location.pathname + location.search + h); } catch(_){} }
+}
+try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch(_){}
 const rid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 async function api(action, data, cfg = CFG){
   let r;
@@ -1111,7 +1123,7 @@ $("sGo").onclick = async () => {
     document.body.classList.remove("member");
     Object.assign(CFG, cfg);
     $("setupCard").hidden = true; document.body.classList.remove("locked"); toast("連上了");
-    if (state.db){ state.me = CFG.name; state.db.refresh(); } else connect();
+    if (state.db){ state.me = CFG.name; state.db.refresh(); syncHash(); } else connect();
     renderConn();
   } catch(e){ $("sErr").hidden = false; $("sErr").textContent = e.code === "bad_key" ? "密碼不對。" : e.message; }
   $("sGo").disabled = false; $("sGo").textContent = "連線";
@@ -1135,6 +1147,7 @@ $("copySiri").onclick = async () => {
 };
 
 function connect(){
+  syncHash();
   const db = makeDb();
   state.db = db; state.me = CFG.name || "";
   let timer = setTimeout(() => setStatus("試算表還沒有回應，畫面上的帳可能不是最新的。", true), 12000);
