@@ -183,8 +183,11 @@ code{font-family:var(--mono);font-size:12.5px;background:var(--bg);border:1px so
   display:flex;flex-direction:column;gap:12px;max-height:90%;overflow:auto}
 .sheet h3{margin:0;font-family:var(--display);font-weight:600;font-size:18px}
 .field{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted)}
-.field input{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;padding:9px 10px;font:inherit;font-size:16px}
-.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.field input{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;padding:9px 10px;font:inherit;font-size:16px;width:100%;min-width:0;max-width:100%;box-sizing:border-box}
+.field input[type="date"]{-webkit-appearance:none;appearance:none;min-height:44px;text-align:left}
+.field input[type="date"]::-webkit-date-and-time-value{text-align:left}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+.two>*{min-width:0}
 .catpick{display:flex;flex-wrap:wrap;gap:6px}
 .catpick button{border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:4px 11px;font-size:14px;display:inline-flex;gap:5px;align-items:center}
 .catpick button[aria-pressed="true"]{border-color:var(--ink);font-weight:700}
@@ -329,7 +332,7 @@ code{font-family:var(--mono);font-size:12.5px;background:var(--bg);border:1px so
       <p style="margin:0;font-size:14px" id="connInfo">還沒連線</p>
       <div class="actions"><span></span><button class="btn ghost sm" id="reSetup">重新設定</button></div>
     </div>
-    <p style="margin:4px 0 0;text-align:center;font-size:12px;color:var(--muted)">版本 v2</p>
+    <p style="margin:4px 0 0;text-align:center;font-size:12px;color:var(--muted)">版本 v3</p>
   </section>
 </div>
 
